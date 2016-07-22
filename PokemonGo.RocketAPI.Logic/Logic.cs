@@ -156,7 +156,13 @@ namespace PokemonGo.RocketAPI.Logic
                 {
                     //Throw berry is we can
                     await UseBerry(pokemon.EncounterId, pokemon.SpawnpointId);
-                }
+                    // Upgrade Pokeball if < 20% cap chance
+                    if (encounterPokemonResponse?.CaptureProbability.CaptureProbability_.First() < 0.20)
+                    {
+                        if (pokeball == MiscEnums.Item.ITEM_POKE_BALL) pokeball = MiscEnums.Item.ITEM_GREAT_BALL;
+                        else if (pokeball == MiscEnums.Item.ITEM_GREAT_BALL) pokeball = MiscEnums.Item.ITEM_ULTRA_BALL;
+                        else if (pokeball == MiscEnums.Item.ITEM_ULTRA_BALL) pokeball = MiscEnums.Item.ITEM_MASTER_BALL;
+                    }
 
                 var pokeball = await GetBestBall(encounter?.WildPokemon);
                 var distance = Navigation.DistanceBetween2Coordinates(_client.CurrentLat, _client.CurrentLng, pokemon.Latitude, pokemon.Longitude);
@@ -220,19 +226,19 @@ namespace PokemonGo.RocketAPI.Logic
             var ultraBallsCount = await _inventory.GetItemAmountByType(MiscEnums.Item.ITEM_ULTRA_BALL);
             var masterBallsCount = await _inventory.GetItemAmountByType(MiscEnums.Item.ITEM_MASTER_BALL);
 
-            if (masterBallsCount > 0 && pokemonCp >= 1000)
+            if (masterBallsCount > 0 && pokemonCp >= 1500)
                 return MiscEnums.Item.ITEM_MASTER_BALL;
-            else if (ultraBallsCount > 0 && pokemonCp >= 1000)
+            else if (ultraBallsCount > 0 && pokemonCp >= 1500)
+                return MiscEnums.Item.ITEM_ULTRA_BALL;
+            else if (greatBallsCount > 0 && pokemonCp >= 1500)
+                return MiscEnums.Item.ITEM_GREAT_BALL;
+
+            if (ultraBallsCount > 0 && pokemonCp >= 1000)
                 return MiscEnums.Item.ITEM_ULTRA_BALL;
             else if (greatBallsCount > 0 && pokemonCp >= 1000)
                 return MiscEnums.Item.ITEM_GREAT_BALL;
 
-            if (ultraBallsCount > 0 && pokemonCp >= 600)
-                return MiscEnums.Item.ITEM_ULTRA_BALL;
-            else if (greatBallsCount > 0 && pokemonCp >= 600)
-                return MiscEnums.Item.ITEM_GREAT_BALL;
-
-            if (greatBallsCount > 0 && pokemonCp >= 350)
+            if (greatBallsCount > 0 && pokemonCp >= 600)
                 return MiscEnums.Item.ITEM_GREAT_BALL;
 
             if (pokeBallsCount > 0)
